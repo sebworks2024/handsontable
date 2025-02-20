@@ -41,7 +41,7 @@ class CollapsingUI extends BaseUI {
       },
       applyStash: (forceRender = true) => {
         this.collapseMultipleChildren(this.lastCollapsedRows, forceRender);
-        this.lastCollapsedRows = undefined;
+        this.lastCollapsedRows = [];
       },
       trimStash: (realElementIndex, amount) => {
         rangeEach(realElementIndex, realElementIndex + amount - 1, (i) => {
