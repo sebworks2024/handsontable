@@ -33,14 +33,18 @@ export class RemoveRowAction extends BaseAction {
    * @param {Array} removedCellMetas List of removed cell metas.
    */
   removedCellMetas;
-
+    /**
+   * @param {string} id The transaction id.
+   */
+    id;
   constructor({
     index,
     data,
     fixedRowsBottom,
     fixedRowsTop,
     rowIndexesSequence,
-    removedCellMetas
+    removedCellMetas,
+    id
   }) {
     super();
     this.index = index;
@@ -49,10 +53,11 @@ export class RemoveRowAction extends BaseAction {
     this.fixedRowsTop = fixedRowsTop;
     this.rowIndexesSequence = rowIndexesSequence;
     this.removedCellMetas = removedCellMetas;
+    this.id = id;
   }
 
   static startRegisteringEvents(hot, undoRedoPlugin) {
-    hot.addHook('beforeRemoveRow', (index, amount, logicRows, source) => {
+    hot.addHook('beforeRemoveRow', (index, amount, logicRows, source, id) => {
       const wrappedAction = () => {
         const physicalRowIndex = hot.toPhysicalRow(index);
         const lastRowIndex = physicalRowIndex + amount - 1;
@@ -68,7 +73,8 @@ export class RemoveRowAction extends BaseAction {
           fixedRowsBottom: hot.getSettings().fixedRowsBottom,
           fixedRowsTop: hot.getSettings().fixedRowsTop,
           rowIndexesSequence: hot.rowIndexMapper.getIndexesSequence(),
-          removedCellMetas: getCellMetas(hot, physicalRowIndex, lastRowIndex, 0, hot.countCols() - 1)
+          removedCellMetas: getCellMetas(hot, physicalRowIndex, lastRowIndex, 0, hot.countCols() - 1),
+          id
         });
       };
 

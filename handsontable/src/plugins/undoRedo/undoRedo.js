@@ -189,46 +189,61 @@ export class UndoRedo extends BasePlugin {
   }
 
   /**
-   * Undo the last action performed to the table.
-   *
-   * @fires Hooks#beforeUndoStackChange
-   * @fires Hooks#afterUndoStackChange
-   * @fires Hooks#beforeRedoStackChange
-   * @fires Hooks#afterRedoStackChange
-   * @fires Hooks#beforeUndo
-   * @fires Hooks#afterUndo
-   */
+ * Undo the last action performed to the table.
+ *
+ * @fires Hooks#beforeUndoStackChange
+ * @fires Hooks#afterUndoStackChange
+ * @fires Hooks#beforeRedoStackChange
+ * @fires Hooks#afterRedoStackChange
+ * @fires Hooks#beforeUndo
+ * @fires Hooks#afterUndo
+ */
   undo() {
     if (!this.isUndoAvailable()) {
       return;
     }
-
     const doneActionsCopy = this.doneActions.slice();
-
-    this.hot.runHooks('beforeUndoStackChange', doneActionsCopy);
-
-    const action = this.doneActions.pop();
-
+    this.hot.runHooks('beforeUndoStackChange', doneActionsCopy, 'UndoRedo.undo');
+    let action = this.doneActions.pop();
     this.hot.runHooks('afterUndoStackChange', doneActionsCopy, this.doneActions.slice());
-
-    const actionClone = deepClone(action);
+    const actionClone = (0, deepClone)(action);
     const continueAction = this.hot.runHooks('beforeUndo', actionClone);
-
     if (continueAction === false) {
       return;
     }
-
     this.ignoreNewActions = true;
-
     const undoneActionsCopy = this.undoneActions.slice();
-
     this.hot.runHooks('beforeRedoStackChange', undoneActionsCopy);
-
-    action.undo(this.hot, () => {
-      this.ignoreNewActions = false;
-      this.undoneActions.push(action);
-    });
-
+    const doneActionsLength = this.doneActions.length;
+    let startTransactionIndex = doneActionsLength;
+    let endTransactionIndex = -1;
+    if (action.id && doneActionsLength) {
+      this.doneActions.forEach((doneAction, index) => {
+        if (doneAction.id === action.id) {
+          if (index < startTransactionIndex) {
+            startTransactionIndex = index;
+          }
+          if (index > endTransactionIndex) {
+            endTransactionIndex = index;
+          }
+        }
+      });
+    }
+    if (startTransactionIndex !== doneActionsLength && endTransactionIndex !== -1) {
+      const undoRedoActions = this.doneActions.splice(startTransactionIndex, 1 + (endTransactionIndex - startTransactionIndex));
+      undoRedoActions.push(action);
+      undoRedoActions.slice().reverse().forEach(undoRedoAction => {
+        undoRedoAction.undo(this.hot, () => {
+          this.ignoreNewActions = false;
+          this.undoneActions.push(undoRedoAction);
+        });
+      });
+    } else {
+      action.undo(this.hot, () => {
+        this.ignoreNewActions = false;
+        this.undoneActions.push(action);
+      });
+    }
     this.hot.runHooks('afterRedoStackChange', undoneActionsCopy, this.undoneActions.slice());
     this.hot.runHooks('afterUndo', actionClone);
   }
@@ -247,34 +262,48 @@ export class UndoRedo extends BasePlugin {
     if (!this.isRedoAvailable()) {
       return;
     }
-
     const undoneActionsCopy = this.undoneActions.slice();
-
-    this.hot.runHooks('beforeRedoStackChange', undoneActionsCopy);
-
+    this.hot.runHooks('beforeRedoStackChange', undoneActionsCopy, 'UndoRedo.redo');
     const action = this.undoneActions.pop();
-
     this.hot.runHooks('afterRedoStackChange', undoneActionsCopy, this.undoneActions.slice());
-
-    const actionClone = deepClone(action);
-
+    const actionClone = (0, deepClone)(action);
     const continueAction = this.hot.runHooks('beforeRedo', actionClone);
-
     if (continueAction === false) {
       return;
     }
-
     this.ignoreNewActions = true;
-
     const doneActionsCopy = this.doneActions.slice();
-
     this.hot.runHooks('beforeUndoStackChange', doneActionsCopy);
-
-    action.redo(this.hot, () => {
-      this.ignoreNewActions = false;
-      this.doneActions.push(action);
-    });
-
+    const undoneActionsLength = this.undoneActions.length;
+    let startTransactionIndex = undoneActionsLength;
+    let endTransactionIndex = -1;
+    if (action.id && undoneActionsLength) {
+      this.undoneActions.forEach((undoneAction, index) => {
+        if (undoneAction.id === action.id) {
+          if (index < startTransactionIndex) {
+            startTransactionIndex = index;
+          }
+          if (index > endTransactionIndex) {
+            endTransactionIndex = index;
+          }
+        }
+      });
+    }
+    if (startTransactionIndex !== undoneActionsLength && endTransactionIndex !== -1) {
+      const undoRedoActions = this.undoneActions.splice(startTransactionIndex, 1 + (endTransactionIndex - startTransactionIndex));
+      undoRedoActions.push(action);
+      undoRedoActions.forEach(undoRedoAction => {
+        undoRedoAction.redo(this.hot, () => {
+          this.ignoreNewActions = false;
+          this.doneActions.push(undoRedoAction);
+        });
+      });
+    } else {
+      action.redo(this.hot, () => {
+        this.ignoreNewActions = false;
+        this.doneActions.push(action);
+      });
+    }
     this.hot.runHooks('afterUndoStackChange', doneActionsCopy, this.doneActions.slice());
     this.hot.runHooks('afterRedo', actionClone);
   }

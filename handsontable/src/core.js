@@ -1604,7 +1604,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
       changeSource = prop;
     }
 
-    const processedChanges = processChanges(changes, source);
+    const processedChanges = processChanges(changes, source || changeSource);
 
     instance.runHooks('afterSetDataAtRowProp', processedChanges, changeSource);
 
@@ -3288,11 +3288,13 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {number} row Visual row index.
    * @param {number} column Visual column index.
    * @param {object} prop Meta object.
+   * @param {string} [source] The source of the call.
+   * 
    */
-  this.setCellMetaObject = function(row, column, prop) {
+  this.setCellMetaObject = function(row, column, prop, source) {
     if (typeof prop === 'object') {
       objectEach(prop, (value, key) => {
-        this.setCellMeta(row, column, key, value);
+        this.setCellMeta(row, column, key, value, source);
       });
     }
   };
@@ -3306,11 +3308,12 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
    * @param {number} column Visual column index.
    * @param {string} key Property name.
    * @param {string} value Property value.
+   * @param {string} [source] The source of the call.
    * @fires Hooks#beforeSetCellMeta
    * @fires Hooks#afterSetCellMeta
    */
-  this.setCellMeta = function(row, column, key, value) {
-    const allowSetCellMeta = instance.runHooks('beforeSetCellMeta', row, column, key, value);
+  this.setCellMeta = function(row, column, key, value, source) {
+    const allowSetCellMeta = instance.runHooks('beforeSetCellMeta', row, column, key, value, source);
 
     if (allowSetCellMeta === false) {
       return;
@@ -3329,7 +3332,7 @@ export default function Core(rootElement, userSettings, rootInstanceSymbol = fal
 
     metaManager.setCellMeta(physicalRow, physicalColumn, key, value);
 
-    instance.runHooks('afterSetCellMeta', row, column, key, value);
+    instance.runHooks('afterSetCellMeta', row, column, key, value, source);
   };
 
   /**

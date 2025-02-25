@@ -15,16 +15,20 @@ export class CreateRowAction extends BaseAction {
    * @param {number} amount The number of created rows.
    */
   amount;
-
-  constructor({ index, amount }) {
+  /**
+   * @param {string} id The transaction id.
+   */
+  id;
+  constructor({ index, amount, id }) {
     super();
     this.index = index;
     this.amount = amount;
+    this.id = id;
   }
 
   static startRegisteringEvents(hot, undoRedoPlugin) {
-    hot.addHook('afterCreateRow', (index, amount, source) => {
-      undoRedoPlugin.done(() => new CreateRowAction({ index, amount }), source);
+    hot.addHook('afterCreateRow', (index, amount, source, id) => {
+      undoRedoPlugin.done(() => new CreateRowAction({ index, amount, id }), source);
     });
   }
 

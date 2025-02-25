@@ -158,7 +158,7 @@ export default class Core {
   selectRows(startRow: number, endRow?: number, focusPosition?: number | SimpleCellCoords | CellCoords): boolean;
   setCellMeta(row: number, column: number, key: string, val: any): void;
   setCellMeta<K extends keyof CellMeta>(row: number, column: number, key: K, val: CellMeta[K]): void;
-  setCellMetaObject(row: number, column: number, prop: CellMeta): void;
+  setCellMetaObject(row: number, column: number, prop: CellMeta, source?: string): void;
   setDataAtCell(changes: Array<[number, number, CellValue]>, source?: string): void;
   setDataAtCell(row: number, column: number, value: CellValue, source?: string): void;
   setDataAtRowProp(changes: Array<[number, string | number, CellValue]>, source?: string): void;

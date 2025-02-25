@@ -130,7 +130,7 @@ export interface Events {
   afterSelectionEndByProp?: (row: number, prop: string, row2: number, prop2: string, selectionLayerLevel: number) => void;
   afterSelectionFocusSet?: (row: number, column: number, preventScrolling: { value: boolean }) => void;
   afterSelectRows?: (from: CellCoords, to: CellCoords, highlight: CellCoords) => void;
-  afterSetCellMeta?: (row: number, column: number, key: string, value: any) => void;
+  afterSetCellMeta?: (row: number, column: number, key: string, value: any, source?: string) => void;
   afterSetDataAtCell?: (changes: CellChange[], source?: ChangeSource) => void;
   afterSetDataAtRowProp?: (changes: CellChange[], source?: ChangeSource) => void;
   afterSetSourceDataAtCell?: (changes: CellChange[], source?: ChangeSource) => void;
@@ -211,7 +211,7 @@ export interface Events {
   beforeSelectionFocusSet?: (coords: CellCoords) => void;
   beforeSelectionHighlightSet?: () => void;
   beforeSelectRows?: (from: CellCoords, to: CellCoords, highlight: CellCoords) => void;
-  beforeSetCellMeta?: (row: number, column: number, key: string, value: any) => boolean | void;
+  beforeSetCellMeta?: (row: number, column: number, key: string, value: any, source?: string) => boolean | void;
   beforeSetRangeEnd?: (coords: CellCoords) => void;
   beforeSetRangeStart?: (coords: CellCoords) => void;
   beforeSetRangeStartOnly?: (coords: CellCoords) => void;
