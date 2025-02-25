@@ -33,7 +33,7 @@ export class RemoveRowAction extends BaseAction {
    * @param {Array} removedCellMetas List of removed cell metas.
    */
   removedCellMetas;
-    /**
+  /**
    * @param {string} id The transaction id.
    */
     id;

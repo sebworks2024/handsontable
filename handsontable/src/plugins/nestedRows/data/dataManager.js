@@ -438,8 +438,9 @@ class DataManager {
    *
    * @param {object} parent The parent row object.
    * @param {object} [element] The element to add as a child.
+   * @param {string} id The transaction id.
    */
-  addChild(parent, element) {
+  addChild(parent, element, id) {
     let childElement = element;
 
     this.hot.runHooks('beforeAddChild', parent, childElement);
@@ -450,7 +451,7 @@ class DataManager {
       parentIndex = this.getRowIndex(parent);
     }
 
-    this.hot.runHooks('beforeCreateRow', parentIndex + this.countChildren(parent) + 1, 1);
+    this.hot.runHooks('beforeCreateRow', parentIndex + this.countChildren(parent) + 1, 1, 'NestedRows.addChild', id);
     let functionalParent = parent;
 
     if (!parent) {
@@ -472,7 +473,7 @@ class DataManager {
 
     this.hot.rowIndexMapper.insertIndexes(newRowIndex, 1);
 
-    this.hot.runHooks('afterCreateRow', newRowIndex, 1);
+    this.hot.runHooks('afterCreateRow', newRowIndex, 1, 'NestedRows.addChild', id);
     this.hot.runHooks('afterAddChild', parent, childElement);
   }
 
